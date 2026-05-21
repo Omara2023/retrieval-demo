@@ -10,7 +10,7 @@ TARGET_SIZE = 300
 
 CORPUS_PATH = "nfcorpus/corpus.jsonl" 
 QUERIES_PATH = "nfcorpus/queries.jsonl"
-MAPPINGS_PATH = "./nfcorpus/qrels/train.tsv"
+Q_RELS_PATH = "./nfcorpus/qrels/train.tsv"
 
 class DatasetBuilder:
     """
@@ -22,7 +22,11 @@ class DatasetBuilder:
     - query -> relevant document mappings
     """
 
-    def __init__(self, target_size: int, query_ids: list[int], corpus_path: str, queries_path: str, qrels_path: str):
+    def __init__(self, target_size: int = TARGET_SIZE, 
+                 query_ids: list[int] = QUERY_IDS, 
+                 corpus_path: str = CORPUS_PATH, 
+                 queries_path: str = QUERIES_PATH, 
+                 qrels_path: str = Q_RELS_PATH):
         self.target_size = target_size
         self.query_ids = {f"PLAIN-{qid}" for qid in query_ids}
         
@@ -115,7 +119,6 @@ class DatasetBuilder:
 
         return dict(mapping)
 
-
     def _build_filtered_corpus(self, corpus: dict[str, str], qrels: dict[str, list[str]]) -> dict[str, str]:
         """
         Constructs bounded evaluation corpus.
@@ -149,10 +152,12 @@ class DatasetBuilder:
             raise FileNotFoundError(f"{path} could not be found.")
 
 if __name__ == "__main__":
-    builder = DatasetBuilder(TARGET_SIZE, QUERY_IDS, CORPUS_PATH, QUERIES_PATH, MAPPINGS_PATH) 
+    builder = DatasetBuilder() 
     dataset = builder.run()
 
     corpus = dataset["corpus"]
     queries = dataset["queries"]
     qrels = dataset["qrels"]  
+
+    print("[Done] Dataset successfully built.")
 
