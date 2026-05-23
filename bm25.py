@@ -31,7 +31,7 @@ class Bm25Retriever:
 
         return [self.doc_ids[i] for i in top_indices]
 
-    def _evaluate(self, query_id: str):
+    def evaluate(self, query_id: str):
         """Return recall@5, mrr relecant & retrived for each query."""
         relevant = set(self.q_rels[query_id])
         query_text = self.queries[query_id]
@@ -40,7 +40,7 @@ class Bm25Retriever:
         retrieved = self._query(query_text, k=5)
         
         hits = len(set(retrieved) & relevant)
-        recall_at_5 = hits / len(relevant)
+        recall_at_5 = hits / len(relevant) if relevant else 0.0
 
         #MRR
         mrr = 0.0
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     retriever = Bm25Retriever(corpus, queries, qrels)
 
     for query_id, query_text in queries.items():
-        recall_at_5, mrr, relevant, retrieved = retriever._evaluate(query_id)
+        recall_at_5, mrr, relevant, retrieved = retriever.evaluate(query_id)
         print(f"Query: {query_text}")
         print(f"Relevant docs: {relevant}")
         print(f"Top-5 retrived: {retrieved}")
