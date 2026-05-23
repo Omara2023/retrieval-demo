@@ -98,16 +98,25 @@ BM25	0.297	0.595	0.59
 Dense	0.344	0.697	6.20
 Hybrid	0.331	0.706	7.35
 
-Note on variance: Minor run-to-run fluctuations were observed due to stochastic negative sampling during corpus construction and floating-point nondeterminism in dense retrieval scoring. However, ranking trends (BM25 < Dense ≈ Hybrid in MRR, BM25 fastest by ~10×) remained consistent across runs.
+Notes on stability:
+Small run-to-run variation was observed, primarily in MRR for dense vs hybrid configurations. This is expected given:
+-stochasticity in evaluation corpus construction (random distractor sampling)
+-nondeterminism in floating-point similarity computations (dense embeddings + score aggregation)
+-small evaluation set size (20 queries total), which increases metric variance
 
-Despite small metric variance, all configurations preserve the same ordering of performance trade-offs, particularly in latency and MRR, which are the primary comparison axes in this assignment
+Despite this, the overall trends remain consistent:
+-BM25 is consistently fastest by ~10×
+-Dense and hybrid consistently outperform BM25 in ranking quality (MRR)
+-Hybrid does not strictly dominate dense on all runs, but remains competitive
+
+Given the scale of the benchmark, conclusions are drawn from relative ordering and trade-offs rather than absolute metric stability.
 
 8. Key Findings
-BM25 is fastest but weakest semantically
-Dense retrieval improves recall and ranking quality but is significantly slower
-Hybrid retrieval achieves the best MRR, indicating improved ranking of relevant documents, but does not strictly dominate recall
+-BM25 provides the strongest efficiency characteristics and remains highly competitive for exact biomedical terminology, but underperforms on semantic or paraphrased queries.
+-Dense retrieval improves ranking quality (MRR) and recall on paraphrased queries, confirming the benefit of semantic embeddings in biomedical language where conceptual similarity is important.
+-Hybrid retrieval generally improves robustness across query types by combining lexical and semantic signals. However, the linear fusion approach does not guarantee dominance over dense retrieval in all cases, likely due to score scale mismatch and sensitivity to normalization.
 
-This suggests that linear fusion improves ranking quality but does not fully resolve recall limitations across heterogeneous query types.
+Overall, results reflect a classic retrieval trade-off: lexical precision (BM25) vs semantic generalisation (dense) vs robustness (hybrid).
 
 9. Failure Cases
 

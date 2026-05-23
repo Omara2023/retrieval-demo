@@ -51,6 +51,9 @@ if __name__ == "__main__":
 
     eval = Evaluator()
 
+    print("BM25: ", end="")
     print(eval.benchmark(bm25))
+    print("Dense: ", end="")
     print(eval.benchmark(dense))
+    print("Hybrid: ", end="")
     print(eval.benchmark(hybrid))
