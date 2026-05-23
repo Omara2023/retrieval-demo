@@ -17,7 +17,17 @@ class Evaluator:
             elapsed = time.perf_counter() - start
             latencies.append(elapsed)
 
-            recall, mrr, _, _ = retriever.evaluate(qid)
+            relevant = set(retriever.q_rels[qid])
+
+            hits = len(set(retrieved) & relevant)
+            recall = hits / len(relevant) if relevant else 0.0
+
+            mrr = 0.0
+            for rank, doc_id in enumerate(retrieved, start=1):
+                if doc_id in relevant:
+                    mrr = 1 / rank
+                    break
+
             recalls.append(recall)
             mrrs.append(mrr)
 
