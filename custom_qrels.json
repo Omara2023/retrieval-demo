@@ -1,0 +1,26 @@
+[{
+    "query": "Can nutritional strategies reduce immune suppression caused by prolonged physical training?",
+    "category": "paraphrased",
+    "ground_truth_ids": ["MED-3164"]
+  },
+  {
+    "query": "What is the cellular mechanism of glyphosate toxicity on male reproductive cells?",
+    "category": "multi-hop",
+    "ground_truth_ids": ["MED-1739"]
+  },
+  {
+    "query": "What drug classes are effective for managing irritable bowel syndrome symptoms?",
+    "category": "standard",
+    "ground_truth_ids": ["MED-946"]
+  },
+  {
+    "query": "How does plant-based eating influence cardiovascular and blood pressure outcomes?",
+    "category": "standard",
+    "ground_truth_ids": ["MED-5329", "MED-5325", "MED-4515"]
+  },
+  {
+    "query": "Do dietary antioxidants or carbohydrate intake modify immune response after intense exercise?",
+    "category": "ambiguous",
+    "ground_truth_ids": ["MED-3164", "MED-3151"]
+  }
+]
