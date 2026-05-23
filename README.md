@@ -133,8 +133,34 @@ Run full pipeline:
 make setup
 make run
 
-12. Design Decisions Summary
-Chose NFCorpus for biomedical lexical-semantic ambiguity
-Retained natural relevance distribution (no artificial balancing)
-Used small corpus (~300 docs) for controlled evaluation and fast iteration
-Included synthetic queries to test model robustness beyond benchmark set
+12. Design Decisions & Alternatives Considered
+
+During implementation, I considered several alternative design choices:
+
+Corpus construction
+Full NFCorpus vs filtered subset
+-Rejected full corpus due to computational cost and reduced ability to iterate quickly on retrieval configurations.
+-Instead used a ~300 document subset preserving all relevant documents plus sampled negatives.
+
+Pure random negatives vs hard negatives
+-Initially considered keyword-based hard negative mining.
+-Rejected due to time constraints and risk of introducing bias in a small evaluation set.
+-Used uniform random sampling for simplicity and reproducibility.
+
+Retrieval models
+-Dense-only retrieval using larger models (e.g. BGE, MPNet)
+-Rejected in favour of all-MiniLM-L6-v2 for latency constraints and local execution requirements.
+-Learning-to-rank / cross-encoder reranking
+-Identified as a strong improvement for final ranking quality.
+-Not implemented due to compute and time constraints, but noted as future work.
+
+Hybrid strategy
+-Learned or query-dependent fusion weights
+-Rejected in favour of fixed 0.5 / 0.5 interpolation for interpretability and simplicity of comparison.
+-Late fusion vs score fusion
+-Chose score-level fusion to maintain consistency across BM25 and dense pipelines.
+
+Vector Indexing (FAISS / ANN libraries)
+-Considered using FAISS for approximate nearest neighbour search to accelerate dense retrieval.
+-Rejected because the corpus size (~300 documents) is small enough that exact brute-force cosine similarity remains fast and avoids additional system complexity.
+-This keeps the dense retrieval implementation transparent and easier to compare directly against BM25.
