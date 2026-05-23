@@ -47,6 +47,13 @@ class DatasetBuilder:
         queries = self._load_selected_queries()
         qrels = self._load_qrels()
 
+        print("[DatasetBuilder] Loading synthetic queries...")
+
+        synth_queries, synth_qrels = self._load_custom_queries("custom_qrels.json")
+
+        queries.update(synth_queries)
+        qrels.update(synth_qrels)
+
         print("[DatasetBuilder] Constructing benchmark corpus...")
 
         filtered_corpus = self._build_filtered_corpus(corpus, qrels)
@@ -63,7 +70,10 @@ class DatasetBuilder:
         with open(self.corpus_path, "r", encoding="utf-8") as f:
             for line in f:
                 doc = json.loads(line)
-                corpus[doc["_id"]] = doc["text"]
+                corpus[doc["_id"]] = {
+                    "title": doc.get("title", ""),
+                    "text": doc["text"]
+                }
 
         print(f"[Corpus] Loaded {len(corpus)} documents.")
         return corpus
@@ -119,7 +129,7 @@ class DatasetBuilder:
 
         return dict(mapping)
 
-    def _build_filtered_corpus(self, corpus: dict[str, str], qrels: dict[str, list[str]]) -> dict[str, str]:
+    def _build_filtered_corpus(self, corpus: dict[str, str], qrels: dict[str, list[str]]) -> dict[str, dict[str, str]]:
         """
         Constructs bounded evaluation corpus.
 
@@ -129,7 +139,7 @@ class DatasetBuilder:
         3. Return final filtered corpus
         """
 
-        positive_doc_ids = set()
+        positive_doc_ids: set[str] = set()
 
         for docs in qrels.values():
             positive_doc_ids.update(docs)
@@ -143,13 +153,54 @@ class DatasetBuilder:
 
         final_doc_ids = positive_doc_ids | set(distractors)
 
-        filtered_corpus = {doc_id: text for doc_id, text in corpus.items() if doc_id in final_doc_ids}
+        filtered_corpus = {
+            doc_id: corpus[doc_id]
+            for doc_id in final_doc_ids
+        }
+        
         return filtered_corpus
         
     @staticmethod
     def _validate_path(path: Path):
         if not path.exists():
             raise FileNotFoundError(f"{path} could not be found.")
+
+    def _load_custom_queries(self, path="custom_qrels.json"):
+        self._validate_path(Path(path))
+
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        queries = {}
+        qrels = {}
+
+        for i, item in enumerate(data):
+            qid = f"SYNTH-{i}"
+            queries[qid] = item["query"]
+            qrels[qid] = item["ground_truth_ids"]
+
+        return queries, qrels
+
+    def write_corpus_to_file(
+        self,
+        corpus: dict[str, dict[str, str]],
+        path: str = "output.csv"
+    ):
+        """Writes corpus dict {doc_id: {title, text}} to CSV file."""
+
+        with open(path, "w", encoding="utf-8", newline="") as f:
+            writer = csv.writer(f)
+
+            writer.writerow(["doc_id", "title", "text"])
+
+            for doc_id, data in corpus.items():
+                writer.writerow([
+                    doc_id,
+                    data.get("title", ""),
+                    data.get("text", "")
+                ])
+
+        print(f"[Corpus] Wrote {len(corpus)} documents to {path}")
 
 if __name__ == "__main__":
     builder = DatasetBuilder() 
@@ -158,6 +209,12 @@ if __name__ == "__main__":
     corpus = dataset["corpus"]
     queries = dataset["queries"]
     qrels = dataset["qrels"]  
+
+    #builder.write_corpus_to_file(corpus)
+
+    for i in corpus:
+        print(corpus[i])
+        break
 
     print("[Done] Dataset successfully built.")
 
