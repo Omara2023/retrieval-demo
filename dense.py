@@ -16,7 +16,7 @@ class DenseRetriever:
         self.model = model or SentenceTransformer("all-MiniLM-L6-v2")
 
         self.doc_ids = list(corpus.keys())
-        self.docs = [corpus[i] for i in self.doc_ids]
+        self.docs = [self._format_doc(i) for i in self.doc_ids]
         self.doc_embeddings = self.model.encode(self.docs, normalize_embeddings=True)
 
 
@@ -32,7 +32,7 @@ class DenseRetriever:
     def encode_query(self, query_text: str):
         return self.model.encode(query_text, normalize_embeddings=True)
 
-    def evaluate(self, query_id: str):
+    def debug_evaluate(self, query_id: str):
         """Return recall@5, mrr relecant & retrived for each query."""
         relevant = set(self.q_rels[query_id])
         query_text = self.queries[query_id]
@@ -53,6 +53,10 @@ class DenseRetriever:
 
         return recall_at_5, mrr, relevant, retrieved
     
+    def _format_doc(self, doc_id):
+        doc = self.corpus[doc_id]
+        return doc["title"] + " " + doc["text"]
+        
 if __name__ == "__main__":
     builder = DatasetBuilder()
     dataset = builder.run()
@@ -64,7 +68,7 @@ if __name__ == "__main__":
     retriever = DenseRetriever(corpus, queries, qrels)
 
     for query_id, query_text in queries.items():
-        recall_at_5, mrr, relevant, retrieved = retriever.evaluate(query_id)
+        recall_at_5, mrr, relevant, retrieved = retriever.debug_evaluate(query_id)
         print(f"Query: {query_text}")
         print(f"Relevant docs: {relevant}")
         print(f"Top-5 retrived: {retrieved}")

@@ -18,7 +18,7 @@ class Bm25Retriever:
         self.index = self._build_index()
 
     def _build_index(self):
-        documents = [self.corpus[doc_id] for doc_id in self.doc_ids]
+        documents = [self._format_doc(doc_id) for doc_id in self.doc_ids]
         tokenised_docs = [self.tokenise(doc) for doc in documents]
         return BM25Okapi(tokenised_docs)
 
@@ -34,7 +34,7 @@ class Bm25Retriever:
     def encode_query(self, query_text: str):
         return self.tokenise(query_text)
 
-    def evaluate(self, query_id: str):
+    def debug_evaluate(self, query_id: str):
         """Return recall@5, mrr relecant & retrived for each query."""
         relevant = set(self.q_rels[query_id])
         query_text = self.queries[query_id]
@@ -59,6 +59,10 @@ class Bm25Retriever:
     def tokenise(text: str):
         return text.lower().split()
     
+    def _format_doc(self, doc_id: str) -> str:
+        doc = self.corpus[doc_id]
+        return doc["title"] + " " + doc["text"]
+
 if __name__ == "__main__":
     builder = DatasetBuilder()
     dataset = builder.run()
@@ -70,7 +74,7 @@ if __name__ == "__main__":
     retriever = Bm25Retriever(corpus, queries, qrels)
 
     for query_id, query_text in queries.items():
-        recall_at_5, mrr, relevant, retrieved = retriever.evaluate(query_id)
+        recall_at_5, mrr, relevant, retrieved = retriever.debug_evaluate(query_id)
         print(f"Query: {query_text}")
         print(f"Relevant docs: {relevant}")
         print(f"Top-5 retrived: {retrieved}")

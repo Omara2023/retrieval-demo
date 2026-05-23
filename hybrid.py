@@ -37,7 +37,7 @@ class HybridRetriever:
         top_indices = np.argsort(hybrid)[::-1][:k]
         return [self.doc_ids[i] for i in top_indices]
 
-    def evaluate(self, query_id: str):
+    def debug_evaluate(self, query_id: str):
         """Return recall@5, mrr relecant & retrived for each query."""
         relevant = set(self.q_rels[query_id])
         query_text = self.queries[query_id]
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     hybrid = HybridRetriever(corpus, queries, qrels, bm25, dense)
 
     for query_id, query_text in queries.items():
-        recall_at_5, mrr, relevant, retrieved = hybrid.evaluate(query_id)
+        recall_at_5, mrr, relevant, retrieved = hybrid.debug_evaluate(query_id)
         print(f"Query: {query_text}")
         print(f"Relevant docs: {relevant}")
         print(f"Top-5 retrived: {retrieved}")
