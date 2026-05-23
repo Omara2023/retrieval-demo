@@ -31,6 +31,9 @@ class Bm25Retriever:
 
         return [self.doc_ids[i] for i in top_indices]
 
+    def encode_query(self, query_text: str):
+        return self.tokenise(query_text)
+
     def evaluate(self, query_id: str):
         """Return recall@5, mrr relecant & retrived for each query."""
         relevant = set(self.q_rels[query_id])

@@ -22,12 +22,15 @@ class DenseRetriever:
 
     def _query(self, query_text: str, k: int = 5):
         """Returns top k results for query."""
-        query_vec = self.model.encode(query_text, normalize_embeddings=True)
+        query_vec = self.encode_query(query_text)
         scores = self.doc_embeddings @ query_vec
 
         top_indices = np.argsort(scores)[::-1][:k]
 
         return [self.doc_ids[i] for i in top_indices]
+
+    def encode_query(self, query_text: str):
+        return self.model.encode(query_text, normalize_embeddings=True)
 
     def evaluate(self, query_id: str):
         """Return recall@5, mrr relecant & retrived for each query."""
