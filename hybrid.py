@@ -31,12 +31,11 @@ class HybridRetriever:
 
         if dense_max > 0:
             dense_scores = dense_scores / dense_max
-            
+
         hybrid = 0.5 * bm25_scores + 0.5 * dense_scores
 
         top_indices = np.argsort(hybrid)[::-1][:k]
         return [self.doc_ids[i] for i in top_indices]
-
 
     def evaluate(self, query_id: str):
         """Return recall@5, mrr relecant & retrived for each query."""
